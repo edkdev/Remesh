@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrueShape Documentation</title>
+<meta name="description" content="User guide for TrueShape, the Blender add-on that cuts triangle counts without changing the shape, then bakes fine detail back as a normal map.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,700;112,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root {
+  --bg: #f7f8fa; --panel: #ffffff; --ink: #161a21; --muted: #5b6372; --rule: #dde1e8; --soft: #eef1f5;
+  --teal: #0e6f69; --teal-soft: #e3f1ef; --amber: #b86e0f; --amber-soft: #fbf1e3;
+  --blue: #2f5fb3; --blue-soft: #e8eefa; --stage: #1a1e26; --stage-rule: #2b3340;
+  --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+  --side: 272px; --top: 60px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11141a; --panel: #171b22; --ink: #e6eaf0; --muted: #98a2b3; --rule: #2a313c; --soft: #1e242d;
+    --teal: #3cc4b6; --teal-soft: #13302e; --amber: #f2a93b; --amber-soft: #332612;
+    --blue: #7ea6ec; --blue-soft: #18243a; --stage: #0c0e12; --stage-rule: #262d38;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11141a; --panel: #171b22; --ink: #e6eaf0; --muted: #98a2b3; --rule: #2a313c; --soft: #1e242d;
+  --teal: #3cc4b6; --teal-soft: #13302e; --amber: #f2a93b; --amber-soft: #332612;
+  --blue: #7ea6ec; --blue-soft: #18243a; --stage: #0c0e12; --stage-rule: #262d38;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: calc(var(--top) + 16px); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.65 var(--body); }
+img { max-width: 100%; display: block; }
+a { color: var(--teal); text-underline-offset: 3px; }
+
+/* ---------- top bar ---------- */
+.top { position: sticky; top: 0; z-index: 20; height: var(--top); display: flex; align-items: center; gap: 16px;
+  padding: 0 24px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule); }
+.brand { display: flex; align-items: center; gap: 10px; font: 800 20px/1 var(--display); font-stretch: 112%;
+  color: var(--ink); text-decoration: none; }
+.brand i { width: 20px; height: 20px; background: var(--teal); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.ver { font: 500 12px/1 var(--mono); color: var(--muted); border: 1px solid var(--rule); border-radius: 99px; padding: 5px 9px; }
+.top .grow { flex: 1; }
+.tbtn { font: 500 14px/1 var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 9px 12px; cursor: pointer; text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
+.tbtn:hover { border-color: var(--teal); }
+.tbtn svg { width: 16px; height: 16px; }
+#menuBtn { display: none; }
+
+/* ---------- layout ---------- */
+.wrap { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); max-width: 1320px; margin: 0 auto; }
+nav.toc { position: sticky; top: var(--top); height: calc(100vh - var(--top)); overflow-y: auto; padding: 28px 16px 40px 24px;
+  border-right: 1px solid var(--rule); }
+.toc p { font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px 10px; }
+.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+.toc li { counter-increment: s; }
+.toc a { display: flex; gap: 10px; padding: 7px 10px; border-radius: 7px; color: var(--muted); text-decoration: none; font-size: 15px; line-height: 1.35; }
+.toc a:before { content: counter(s); font: 500 12px/1.9 var(--mono); min-width: 18px; color: var(--muted); opacity: .7; }
+.toc a:hover { color: var(--ink); background: var(--soft); }
+.toc a.on { color: var(--teal); background: var(--teal-soft); font-weight: 600; }
+.toc a.on:before { color: var(--teal); opacity: 1; }
+.toc .aside { margin-top: 24px; padding: 14px 10px 0; border-top: 1px solid var(--rule); font-size: 14px; color: var(--muted); }
+.toc .aside a { display: inline; padding: 0; color: var(--teal); }
+.toc .aside a:before { content: none; }
+
+main { padding: 40px clamp(16px, 5vw, 72px) 120px; min-width: 0; }
+.doc { max-width: 820px; }
+
+/* ---------- hero ---------- */
+.hero .kicker { font: 500 13px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+.hero h1 { font: 800 clamp(40px, 6vw, 64px)/1 var(--display); font-stretch: 112%; letter-spacing: -.01em; margin: 14px 0 16px; }
+.hero .lead { font-size: 21px; color: var(--muted); max-width: 680px; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }
+.facts li { font-size: 14px; color: var(--muted); background: var(--panel); border: 1px solid var(--rule); border-radius: 99px; padding: 5px 12px; }
+
+/* ---------- sections ---------- */
+section { padding-top: 56px; }
+h2 { font: 800 32px/1.1 var(--display); font-stretch: 112%; margin: 0 0 18px; display: flex; gap: 14px; align-items: baseline; }
+h2 .n { font: 500 15px/1 var(--mono); color: var(--teal); min-width: 26px; }
+h3 { font: 700 21px/1.25 var(--display); font-stretch: 112%; margin: 34px 0 10px; }
+h4 { font-size: 17px; margin: 22px 0 6px; }
+p { margin: 0 0 14px; }
+ul, ol { padding-left: 24px; margin: 0 0 16px; }
+li { margin-bottom: 6px; }
+b, strong { font-weight: 600; }
+code { font: 500 .84em var(--mono); background: var(--soft); border: 1px solid var(--rule); border-radius: 5px; padding: 1px 5px; }
+.ui { font-weight: 600; font-size: .92em; background: var(--soft); border: 1px solid var(--rule); border-bottom-width: 2px;
+  border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
+
+ol.steps { list-style: none; padding: 0; counter-reset: st; }
+ol.steps > li { counter-increment: st; position: relative; padding: 2px 0 10px 46px; margin: 0; }
+ol.steps > li:before { content: counter(st); position: absolute; left: 0; top: 1px; width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center; font: 600 14px/1 var(--mono); color: var(--teal); background: var(--teal-soft); }
+ol.steps > li:not(:last-child):after { content: ""; position: absolute; left: 14.5px; top: 36px; bottom: 2px; width: 1px; background: var(--rule); }
+
+.call { border-radius: 10px; padding: 14px 18px; margin: 18px 0 22px; border: 1px solid; }
+.call > b:first-child { display: block; margin-bottom: 2px; }
+.call p:last-child { margin: 0; }
+.tip { background: var(--teal-soft); border-color: color-mix(in srgb, var(--teal) 35%, transparent); }
+.tip > b:first-child { color: var(--teal); }
+.note { background: var(--blue-soft); border-color: color-mix(in srgb, var(--blue) 35%, transparent); }
+.note > b:first-child { color: var(--blue); }
+.warn { background: var(--amber-soft); border-color: color-mix(in srgb, var(--amber) 40%, transparent); }
+.warn > b:first-child { color: var(--amber); }
+
+/* ---------- figures ---------- */
+figure { margin: 24px 0 28px; }
+.stage { background: radial-gradient(ellipse at 50% 60%, #262d39, var(--stage) 75%); border: 1px solid var(--stage-rule); border-radius: 12px; overflow: hidden; }
+.cmp { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 1px; background: var(--stage-rule); }
+.cmp > div { position: relative; background: radial-gradient(ellipse at 50% 60%, #262d39, #14171d 80%); }
+.cmp img { width: 100%; height: 100%; object-fit: cover; }
+.cmp .pad img { object-fit: contain; padding: 14px; }
+.lbl { position: absolute; left: 10px; bottom: 10px; font: 500 12px/1 var(--mono); color: #c9d1dc; background: rgba(12,14,18,.78);
+  border: 1px solid #2f3846; border-radius: 6px; padding: 7px 9px; }
+.lbl b { font: 800 15px/1 var(--display); font-stretch: 112%; color: #fff; margin-left: 6px; }
+.lbl.hi { border-color: #1d6d66; } .lbl.hi b { color: #3cc4b6; }
+figcaption { font-size: 14.5px; color: var(--muted); margin-top: 10px; }
+.shot img { border-radius: 10px; border: 1px solid var(--rule); }
+
+.two { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 32px; align-items: start; }
+.two .shot { margin: 4px 0 0; }
+
+/* ---------- tables ---------- */
+.tbl { border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--panel); margin: 18px 0 24px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; line-height: 1.5; }
+th { text-align: left; font: 600 12px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  background: var(--soft); padding: 11px 14px; border-bottom: 1px solid var(--rule); }
+td { padding: 13px 14px; border-top: 1px solid var(--rule); vertical-align: top; }
+tr:first-child td { border-top: 0; }
+td:first-child { font-weight: 600; min-width: 150px; }
+td:first-child small { display: block; font: 500 12px/1.4 var(--mono); color: var(--muted); margin-top: 3px; }
+.kv { display: grid; grid-template-columns: max-content 1fr; }
+.kv > div { padding: 11px 14px; border-top: 1px solid var(--rule); }
+.kv > div:nth-child(-n+2) { border-top: 0; }
+.kv > div:nth-child(odd) { font: 500 14px/1.5 var(--mono); color: var(--ink); background: var(--soft); }
+
+.recipes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
+.recipe { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+.recipe h4 { margin: 0 0 8px; font-size: 16px; }
+.recipe p { margin: 0; font-size: 15px; color: var(--muted); }
+
+.kept { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0; }
+.kept > div { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+.kept h4 { margin: 0 0 10px; }
+.kept ul { list-style: none; padding: 0; margin: 0; font-size: 15px; }
+.kept li { padding-left: 26px; position: relative; }
+.kept li:before { position: absolute; left: 0; font-weight: 700; }
+.kept .yes li:before { content: "\2713"; color: var(--teal); }
+.kept .no li:before { content: "\2715"; color: var(--amber); }
+
+details { border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); margin: 10px 0; }
+summary { cursor: pointer; padding: 13px 16px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary:after { content: "+"; font: 500 18px/1 var(--mono); color: var(--muted); }
+details[open] summary:after { content: "\2212"; }
+details > div { padding: 0 16px 6px; color: var(--ink); }
+
+pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
+.foot { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--muted); }
+
+/* ---------- small screens ---------- */
+@media (max-width: 960px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); }
+  #menuBtn { display: inline-flex; }
+  nav.toc { position: fixed; z-index: 15; left: 0; top: var(--top); width: min(320px, 86vw); background: var(--bg);
+    transform: translateX(-102%); transition: transform .2s ease; box-shadow: 0 20px 40px rgba(0,0,0,.18); }
+  body.nav-open nav.toc { transform: none; }
+  .two { grid-template-columns: minmax(0, 1fr); }
+  .two .shot { max-width: 260px; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .top { padding: 0 16px; gap: 10px; }
+  .ver, .tbtn .t { display: none; }
+  main { padding: 28px 16px 90px; }
+  h2 { font-size: 26px; }
+  .recipes, .kept { grid-template-columns: minmax(0, 1fr); }
+  .lbl { left: 6px; bottom: 6px; font-size: 10px; padding: 5px 6px; }
+  .lbl b { font-size: 12px; margin-left: 4px; }
+  .k3 .lbl { font-size: 0; } .k3 .lbl b { margin: 0; }
+  /* settings tables become stacked cards */
+  .tbl { border: 0; background: none; overflow: visible; }
+  table, tbody, tr, td { display: block; width: 100%; }
+  thead, tr.h { display: none; }
+  tr { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+  td { border-top: 1px solid var(--rule); }
+  td[data-l]:before { content: attr(data-l); display: block; font: 600 11px/1.3 var(--mono); letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  td:first-child { background: var(--soft); }
+  .kv { grid-template-columns: minmax(0, 1fr); }
+  .tbl.kv { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+  .kv > div:nth-child(n) { border-top: 0; }
+  .kv > div:nth-child(odd) { border-top: 1px solid var(--rule); }
+  .kv > div:first-child { border-top: 0; }
+}
+@media print {
+  .top, nav.toc { display: none; }
+  .wrap { display: block; }
+  details > div { display: block; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="tbtn" id="menuBtn" aria-label="Open contents" aria-expanded="false">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+  </button>
+  <a class="brand" href="#top"><i></i>TrueShape</a>
+  <span class="ver">v0.4.0</span>
+  <span class="grow"></span>
+  <a class="tbtn" href="TrueShape_Guide.pdf" download>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8m0 0L5 7m3 3 3-3M3 13h10"/></svg><span class="t">PDF</span>
+  </a>
+  <button class="tbtn" id="themeBtn" aria-label="Switch light or dark theme">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5a5.5 5.5 0 0 0 0 11z" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#what">What TrueShape does</a></li>
+    <li><a href="#install">Installing</a></li>
+    <li><a href="#quick">Quick start</a></li>
+    <li><a href="#tut1">Tutorial: a game-ready prop</a></li>
+    <li><a href="#tut2">Tutorial: a dense character</a></li>
+    <li><a href="#reduce">Reduce settings</a></li>
+    <li><a href="#options">Reduce Options</a></li>
+    <li><a href="#bake">Bake Detail settings</a></li>
+    <li><a href="#result">Reading the result</a></li>
+    <li><a href="#recipes">Recipes</a></li>
+    <li><a href="#kept">What is kept</a></li>
+    <li><a href="#notfor">When not to use it</a></li>
+    <li><a href="#trouble">Troubleshooting</a></li>
+  </ol>
+  <div class="aside">Prefer paper? <a href="TrueShape_Guide.pdf" download>Download the PDF guide</a>.</div>
+</nav>
+
+<main id="top">
+<div class="doc">
+
+<header class="hero">
+  <div class="kicker">Blender add-on &middot; User guide</div>
+  <h1>TrueShape</h1>
+  <p class="lead">Cut the triangle count of any model without changing its shape, then bake the fine detail back as a normal map.</p>
+  <ul class="facts">
+    <li>Version 0.4.0</li>
+    <li>Blender 4.2 and later (tested on 5.2)</li>
+    <li>Windows, macOS, Linux</li>
+    <li>Pure Python, nothing to compile</li>
+  </ul>
+</header>
+
+<figure>
+  <div class="stage cmp">
+    <div class="pad"><img src="images/r_bike_orig.png" alt="The original BMX bike, 21,510 triangles"><span class="lbl">Original<b>21,510</b></span></div>
+    <div class="pad"><img src="images/r_bike_low.png" alt="The same bike after Reduce, about 10,000 triangles"><span class="lbl hi">After Reduce<b>~10,000</b></span></div>
+  </div>
+  <figcaption>One Reduce, half the triangles. No vertex moved, so the frame, spokes and chain keep their exact shape.</figcaption>
+</figure>
+
+<!-- ============================================================ 1 -->
+<section id="what">
+<h2><span class="n">01</span>What TrueShape does</h2>
+<p>TrueShape has two tools, found in the 3D Viewport sidebar (press <span class="ui">N</span>) under the <span class="ui">TrueShape</span> tab.</p>
+
+<h3>Reduce</h3>
+<p>Removes triangles until your selection fits a triangle budget. It never moves or invents a vertex: the result is built only from vertices the model already had. That is why thin parts such as tubes, spokes and straps cannot shrink, and why UVs stay exact.</p>
+<p>It removes the cheapest things first, across every selected object at once, so the budget goes where the model needs it:</p>
+<ul>
+  <li><b>Whole edge loops</b> that carry no shape (for example, the extra rings along a straight tube). This keeps clean quad flow.</li>
+  <li><b>Single vertices</b> where there are no clean loops, merged into a neighbour.</li>
+</ul>
+<p>Every removal is measured against the original: how far it moves the surface, and how far it turns it. Reduce never makes a change that goes past the limits you set, and it tells you if the budget could not be reached within them.</p>
+
+<h3>Bake Detail</h3>
+<p>Detail smaller than the new triangles cannot survive any reduction. Bake Detail puts it back into the lighting: it bakes a normal map from the original onto the reduced model, the standard way game assets look dense while staying light.</p>
+
+<figure>
+  <div class="stage cmp k3" style="--cols:3">
+    <div><img src="images/r_bust_orig.png" alt="Original knight, close-up of helmet and shoulders"><span class="lbl">Original<b>604k</b></span></div>
+    <div><img src="images/r_bust_low.png" alt="The knight reduced to 50,000 triangles"><span class="lbl">Reduce<b>50k</b></span></div>
+    <div><img src="images/r_bust_bake.png" alt="The 50,000-triangle knight with a baked normal map"><span class="lbl hi">+ Bake Detail<b>50k</b></span></div>
+  </div>
+  <figcaption>A 604,000-triangle knight reduced to 50,000, then with Bake Detail. The baked version lights close to the original at a twelfth of the triangles.</figcaption>
+</figure>
+
+<h3>Faces or triangles?</h3>
+<p>Reduce <b>removes vertices</b>, <b>counts triangles</b>, and <b>keeps quads and n-gons</b> wherever it can. The budget is in triangles because that is what GPUs draw and what game engines report, and because a face count is ambiguous: a quad is two triangles, a six-sided n-gon is four.</p>
+<p>So with Blender's Statistics overlay on, a result on budget reads something like <code>Triangles 10,000</code> and <code>Faces ~6,000</code>. That is expected. If you need an all-triangle mesh, add a Triangulate modifier or let the exporter triangulate; the triangle count does not change.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="install">
+<h2><span class="n">02</span>Installing</h2>
+<ol class="steps">
+  <li>In Blender, open <span class="ui">Edit &rsaquo; Preferences &rsaquo; Get Extensions</span>.</li>
+  <li>Click the <span class="ui">&#8964;</span> menu at the top right and choose <span class="ui">Install from Disk&hellip;</span></li>
+  <li>Pick <code>trueshape-0.4.0.zip</code>. The add-on is enabled straight away.</li>
+</ol>
+<p>You can also drag the zip file onto the Blender window.</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="quick">
+<h2><span class="n">03</span>Quick start</h2>
+<div class="two">
+  <figure class="shot"><img src="images/panel.png" alt="The TrueShape panel in the Blender sidebar" width="306" height="510"></figure>
+  <div>
+    <ol class="steps">
+      <li>In Object Mode, select the object(s) you want lighter. The panel shows how many triangles are selected.</li>
+      <li>Set <span class="ui">Triangle Budget</span> to your target, for example 10,000.</li>
+      <li>Leave the other settings at their defaults for a first try.</li>
+      <li>Click <span class="ui">Reduce</span>. A progress bar replaces the button. You can orbit the view while it works; press <span class="ui">Esc</span> to cancel.</li>
+      <li>A new object called <code>&lt;name&gt;_low</code> appears next to each original. The originals are hidden, never changed.</li>
+      <li>If fine surface detail looks softer, keep the new object selected and click <span class="ui">Bake Detail</span>.</li>
+    </ol>
+    <div class="call tip"><b>Safe to experiment</b>Reduce never edits your original. Press <span class="ui">Ctrl Z</span> to undo, or delete the <code>_low</code> objects and unhide the originals with <span class="ui">Alt H</span>.</div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="tut1">
+<h2><span class="n">04</span>Tutorial: a game-ready prop</h2>
+<p><b>Goal:</b> a 21,510-triangle BMX bike (nine separate parts: frame, fork, wheels, chain, brake and so on) under 10,000 triangles, looking the same, with every part still separate so the wheels can spin.</p>
+<ol class="steps">
+  <li><b>Select all nine parts.</b> Reduce shares one budget across everything selected, and spends it where it matters: the chain and spokes keep their triangles while flat plates and straight tubes give theirs up.</li>
+  <li><b>Set Triangle Budget to 10000.</b></li>
+  <li><b>Set Max Deviation to 1%</b> (the default). The bike is about 5 units across, so no point of the surface may move more than about 5 cm.</li>
+  <li><b>Untick Max Angle (Keep Surface Detail).</b> This bike is stylised and flat-shaded, so its facets are meant to show; protecting every small facet would stop Reduce at about 12,600 triangles.</li>
+  <li><b>Leave Protect UVs on</b>, because the bike is textured.</li>
+  <li><b>Click Reduce.</b> About 10 to 20 seconds later there are nine <code>_low</code> objects with about 10,000 triangles between them.</li>
+</ol>
+<figure>
+  <div class="stage cmp">
+    <div><img src="images/r_bike_close_orig.png" alt="Wireframe of the original bike's rear wheel and chainstays, fully triangulated"><span class="lbl">Original<b>21,510</b></span></div>
+    <div><img src="images/r_bike_close_low.png" alt="Wireframe after Reduce: the tyre and tubes are clean quad rings"><span class="lbl hi">After Reduce<b>~10,000</b></span></div>
+  </div>
+  <figcaption>The bike arrived triangulated. Pair Triangles joined flat pairs into quads, then Reduce removed whole rings from the tyre and tubes. The largest measured distance between the two surfaces was 0.02% of the bike's size.</figcaption>
+</figure>
+<div class="call note"><b>Why each part stays usable</b>Every <code>_low</code> object keeps its original's location, rotation (including quaternion rotation), scale, parent, collections, materials, vertex group weights and animation action. A wheel that spun before still spins.</div>
+<div class="call note"><b>Split imports are handled for you</b>This bike came in as loose triangles, with every face separate from its neighbours. Reduce welds such models automatically and keeps them flat-shaded, so they look exactly as they did.</div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="tut2">
+<h2><span class="n">05</span>Tutorial: a dense character with baked detail</h2>
+<p><b>Goal:</b> a 604,000-triangle AI-generated knight (no UVs, crisp armour bevels and hammered plates) down to 50,000 triangles for a game, keeping its look.</p>
+
+<h3>Step 1: see how much detail geometry can keep</h3>
+<p>Run Reduce once with <span class="ui">Keep Surface Detail</span> on at 15&deg;. On this knight it stopped at about 130,000 triangles with the report "budget not reached". That is useful information: keeping every bevel as real geometry needs about 130k triangles. At 50k, the finest detail has to live in a normal map instead.</p>
+
+<h3>Step 2: reduce to the budget</h3>
+<ol class="steps">
+  <li>Select the original knight.</li>
+  <li>Triangle Budget <b>50000</b>, Max Deviation <b>1%</b>.</li>
+  <li><b>Untick Max Angle</b> (or raise it to about 30&deg;). The bake will restore the lighting detail, so geometry only has to hold the silhouette.</li>
+  <li>Normals: <b>Smooth</b>. The bake is computed against these normals.</li>
+  <li>Click <span class="ui">Reduce</span>. A 604k mesh takes several minutes; the progress bar shows how far it has got.</li>
+</ol>
+
+<figure>
+  <div class="stage cmp">
+    <div><img src="images/r_bust_orig_wire.png" alt="Wireframe of the original knight: a dense, even triangle mesh"><span class="lbl">Original<b>603,788</b></span></div>
+    <div><img src="images/r_bust_low_wire.png" alt="Wireframe after Reduce: large triangles on flat plates, small ones on rivets and edges"><span class="lbl hi">Reduced<b>50,000</b></span></div>
+  </div>
+  <figcaption>Triangles stay where the shape needs them: flat plates give theirs up, rivets, visor edges and bevels keep theirs.</figcaption>
+</figure>
+
+<h3>Step 3: bake the detail back</h3>
+<ol class="steps">
+  <li>Keep <code>medieval_knight_paladin_low</code> selected and active. TrueShape knows which original it came from.</li>
+  <li>Resolution <b>2048</b>, Margin <b>16 px</b>.</li>
+  <li>Click <span class="ui">Bake Detail</span>. The knight has no UVs, so TrueShape unwraps it first, then Blender bakes in the background (progress in the status bar, <span class="ui">Esc</span> cancels). On the test machine the 2048 bake took about 4 seconds.</li>
+</ol>
+
+<figure>
+  <div class="stage cmp k3" style="--cols:3">
+    <div class="pad"><img src="images/r_knight_orig.png" alt="Full knight, original"><span class="lbl">Original<b>604k</b></span></div>
+    <div class="pad"><img src="images/r_knight_low.png" alt="Full knight, reduced"><span class="lbl">Reduce<b>50k</b></span></div>
+    <div class="pad"><img src="images/r_knight_bake.png" alt="Full knight, reduced and baked"><span class="lbl hi">+ Bake<b>50k</b></span></div>
+  </div>
+</figure>
+<figure class="shot">
+  <img src="images/knight_bake.png" alt="Four close-ups of the knight's shoulder armour">
+  <figcaption>Shoulder close-up, from left: original (604k) &middot; Keep Surface Detail at 15&deg; (130k) &middot; Reduce to 50k &middot; 50k + Bake Detail.</figcaption>
+</figure>
+<div class="call warn"><b>Bake onto a fresh Reduce</b>Only bake onto objects made by TrueShape 0.3 or later. Older versions copied the original's custom normals without converting them, and a normal map baked against those normals comes out wrong.</div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="reduce">
+<h2><span class="n">06</span>Reduce: every setting</h2>
+<div class="tbl"><table>
+  <thead><tr class="h"><th style="width:20%">Setting</th><th style="width:28%">What it does</th><th>Use it / raise it when</th><th>Avoid / lower it when</th></tr></thead>
+  <tbody>
+  <tr>
+    <td>Triangle Budget<small>default 10,000</small></td>
+    <td data-l="What it does">Total triangles for everything selected together. N-gons count as the triangles they would split into.</td>
+    <td data-l="Use it when">Set it to the real target: a game's per-asset budget, or a level-of-detail step (LOD1 about 50%, LOD2 about 25%).</td>
+    <td data-l="Keep in mind">Don't expect any budget to be met at any cost. If a limit below stops Reduce first, the report says so; loosen that limit or bake instead.</td>
+  </tr>
+  <tr>
+    <td>Max Deviation<small>default 1%, min 0.01%</small></td>
+    <td data-l="What it does">The furthest any part of the surface may move, as a share of the selection's size (its bounding-box diagonal).</td>
+    <td data-l="Raise it when">0.5&ndash;2% for game assets seen at normal distance. Raise it if Reduce stops early and the result still looks right.</td>
+    <td data-l="Lower it when">0.1&ndash;0.3% for close-ups or hero assets. At the minimum, 0.01%, almost nothing may move, so Reduce often stops long before the budget.</td>
+  </tr>
+  <tr>
+    <td>Max Angle<small>Keep Surface Detail, on, 15&deg;</small></td>
+    <td data-l="What it does">The furthest any part of the surface may turn. Lighting follows surface direction, so this protects bevels, creases and small facets that barely move the surface but change how it looks.</td>
+    <td data-l="Use it when">Keep it on for untextured or unbaked assets, and anything with crisp hard-surface detail. Lower it (10&deg;) to keep more detail.</td>
+    <td data-l="Avoid it when">Turn it off, or raise it to 25&ndash;35&deg;, for stylised low-poly models whose facets are meant to show, and whenever you will use Bake Detail afterwards.</td>
+  </tr>
+  <tr>
+    <td>Protect UVs<small>on</small></td>
+    <td data-l="What it does">Keeps UV seams exactly, and skips any removal that would slide the texture by more than UV Tolerance.</td>
+    <td data-l="Use it when">Any textured model you will keep using with its current textures.</td>
+    <td data-l="Avoid it when">Untextured models, or ones you will re-unwrap and re-bake anyway. Turning it off lets Reduce go further.</td>
+  </tr>
+  <tr>
+    <td>Normals<small>Smooth</small></td>
+    <td data-l="What it does"><b>Smooth</b> recomputes normals from the reduced shape; marked sharp edges stay sharp. <b>From Original</b> gives each kept vertex the exact normal it had on the original.</td>
+    <td data-l="Use it when">Smooth: almost always, and always before Bake Detail. From Original: smooth organic models whose authored lighting you want to match without baking.</td>
+    <td data-l="Avoid it when">From Original on flat-shaded or faceted models; the original's per-face look can't be carried by fewer faces.</td>
+  </tr>
+  </tbody>
+</table></div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="options">
+<h2><span class="n">07</span>Reduce Options: every setting</h2>
+<p>Under <span class="ui">Reduce &rsaquo; Options</span>. The defaults suit most models.</p>
+<div class="tbl"><table>
+  <thead><tr class="h"><th style="width:20%">Setting</th><th style="width:28%">What it does</th><th>Raise it when</th><th>Lower it when</th></tr></thead>
+  <tbody>
+  <tr>
+    <td>UV Tolerance<small>0.002</small></td>
+    <td data-l="What it does">How far, in UV units, the texture may slide under a removal (0.002 is about 4 pixels on a 2048 texture).</td>
+    <td data-l="Raise it when">Textures are low-resolution or blurry, and you want more reduction.</td>
+    <td data-l="Lower it when">The texture has pixel art, text or decals that must not shift.</td>
+  </tr>
+  <tr>
+    <td>Pair Triangles<small>10&deg;</small></td>
+    <td data-l="What it does">Before reducing, joins triangle pairs that are nearly flat into quads, so Reduce can find edge loops to remove.</td>
+    <td data-l="Raise it when">The model was triangulated on export and you want cleaner quad flow in the result.</td>
+    <td data-l="Lower it when">0&deg; keeps triangles as they are; Reduce then works vertex by vertex.</td>
+  </tr>
+  <tr>
+    <td>Weld<small>0.00001</small></td>
+    <td data-l="What it does">Merges vertices closer than this share of each object's size. Fixes models imported with every face split apart (OBJ, STL, game rips).</td>
+    <td data-l="Raise it when">The model has tiny gaps between faces that should touch.</td>
+    <td data-l="Lower it when">Separate parts sit very close together and must stay separate (layered clothing, stacked plates). 0 never merges.</td>
+  </tr>
+  <tr>
+    <td>Hide Original<small>on</small></td>
+    <td data-l="What it does">Hides the source objects after Reduce. They are never modified either way.</td>
+    <td data-l="Advice" colspan="2">Turn it off to see before and after side by side.</td>
+  </tr>
+  </tbody>
+</table></div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="bake">
+<h2><span class="n">08</span>Bake Detail: every setting</h2>
+<div class="tbl"><table>
+  <thead><tr class="h"><th style="width:20%">Setting</th><th style="width:34%">What it does</th><th>Advice</th></tr></thead>
+  <tbody>
+  <tr>
+    <td>Resolution<small>2048</small></td>
+    <td data-l="What it does">Size of the normal map: 1024, 2048 or 4096 pixels square.</td>
+    <td data-l="Advice">1024 for small props, 2048 for most assets, 4096 for large or hero characters. Higher resolution bakes slower and uses more memory in-game.</td>
+  </tr>
+  <tr>
+    <td>Margin<small>16 px</small></td>
+    <td data-l="What it does">How far the bake bleeds past the edge of each UV island.</td>
+    <td data-l="Advice">Raise it (24&ndash;32) if thin dark lines or specks appear along UV seams, especially when the texture is mip-mapped in a game.</td>
+  </tr>
+  <tr>
+    <td>New UVs<small>off</small></td>
+    <td data-l="What it does">Unwraps a fresh UV map called <code>TrueShape_Bake</code> for the bake, even if the model already has UVs. Models without UVs are always unwrapped.</td>
+    <td data-l="Advice">Turn it on when the existing UVs overlap or are mirrored: a bake needs every face to have its own space. Your original UV map is kept for the other textures.</td>
+  </tr>
+  </tbody>
+</table></div>
+
+<h4>What Bake Detail creates</h4>
+<div class="tbl kv">
+  <div>An image</div><div><code>&lt;object&gt;_normal</code>, packed into the .blend file. To export it, open it in the Image Editor and use <span class="ui">Image &rsaquo; Save As</span>.</div>
+  <div>Material copies</div><div><code>&lt;material&gt;_&lt;object&gt;</code>, wired Image Texture (Non-Color) &rarr; Normal Map &rarr; Principled BSDF Normal. The original's materials are not touched.</div>
+  <div>A UV map</div><div><code>TrueShape_Bake</code>, only if one had to be unwrapped.</div>
+</div>
+<div class="call note"><b>Render engine</b>Baking needs Cycles. TrueShape switches to it for the bake and switches back afterwards. Cycles uses your GPU if it is set up under <span class="ui">Preferences &rsaquo; System</span>.</div>
+<div class="call note"><b>Exporting to game engines</b>Blender bakes OpenGL-style normal maps (green channel up). Unity and Godot use the same convention. Unreal uses DirectX style: tick <i>Flip Green Channel</i> on the texture in Unreal.</div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="result">
+<h2><span class="n">09</span>Reading the result</h2>
+<p>After each run the panel shows one fact per line:</p>
+<div class="tbl kv">
+  <div>21,510 &rarr; 10,000 tris</div><div>Triangles before and after, across all selected objects.</div>
+  <div>moved &le; 0.16%</div><div>The largest distance any removal moved the surface, as a share of the selection's size. A cautious upper bound: the true figure is usually lower.</div>
+  <div>turned &le; 15&deg;</div><div>The largest angle any part of the surface turned.</div>
+  <div>11s</div><div>How long it took.</div>
+  <div>budget not reached</div><div>Shown when a limit stopped Reduce first. The Info log says which one: Max Deviation or Max Angle, or "nothing else can go without breaking UVs, seams or topology".</div>
+</div>
+<p><b>While it runs</b>, the button becomes a progress bar (Preparing, Finding removals, Reducing <i>n</i> &rarr; <i>budget</i> tris), and the status bar shows the same. You can orbit and zoom; other editing waits until it finishes. <span class="ui">Esc</span> cancels and changes nothing.</p>
+<p>The same model with the same settings always gives exactly the same result.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="recipes">
+<h2><span class="n">10</span>Recipes</h2>
+<div class="recipes">
+  <div class="recipe"><h4>Bought or AI asset for a game, textured</h4>
+    <p>Budget: your target &middot; Max Deviation 1% &middot; Max Angle 15&ndash;25&deg; &middot; Protect UVs on &middot; Normals Smooth. If fine detail softens, run Bake Detail.</p></div>
+  <div class="recipe"><h4>Dense sculpt, scan or AI mesh without UVs</h4>
+    <p>Budget: your target &middot; Max Deviation 1% &middot; Max Angle off (or 30&deg;) &middot; Normals Smooth &rarr; Bake Detail at 2048 (4096 for hero characters).</p></div>
+  <div class="recipe"><h4>Stylised low-poly or flat-shaded</h4>
+    <p>Max Deviation 1&ndash;2% &middot; Max Angle off &middot; Protect UVs on if textured.</p></div>
+  <div class="recipe"><h4>Hero asset or close-up</h4>
+    <p>Max Deviation 0.2% &middot; Max Angle 10&deg;. Accept a higher triangle count; the report tells you what the limits allow.</p></div>
+  <div class="recipe"><h4>Level-of-detail chain</h4>
+    <p>Reduce the original once per level (for example 50%, 25% and 10%), each from the original, not from the previous level. Raise Max Deviation for far levels (2&ndash;5%).</p></div>
+  <div class="recipe"><h4>Multi-part model, one budget</h4>
+    <p>Select every part and run once. Parts stay separate objects with their pivots, parents and animation.</p></div>
+</div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section id="kept">
+<h2><span class="n">11</span>What is kept, what is not</h2>
+<div class="kept">
+  <div class="yes"><h4>Kept on the reduced copy</h4><ul>
+    <li>Shape, within Max Deviation and Max Angle</li>
+    <li>UV maps, exactly</li>
+    <li>Materials and per-face assignment</li>
+    <li>Color attributes (per vertex and per corner)</li>
+    <li>Vertex group weights (rigging)</li>
+    <li>Marked seams and sharp edges</li>
+    <li>Location, rotation, scale, parent, collections</li>
+    <li>Animation action</li>
+  </ul></div>
+  <div class="no"><h4>Not kept</h4><ul>
+    <li><b>Modifiers.</b> Reduce uses the base mesh. Apply any modifier whose result you want reduced (Mirror, Subdivision, Boolean) first. TrueShape warns you when a source has modifiers.</li>
+    <li><b>Shape keys</b> are not carried over yet; TrueShape warns you. Reduce before creating shape keys, or apply them.</li>
+    <li><b>Custom normals</b> as they were: they are rebuilt (see Normals).</li>
+    <li><b>Constraints and drivers</b> on the object are not copied.</li>
+  </ul></div>
+</div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section id="notfor">
+<h2><span class="n">12</span>When not to use TrueShape</h2>
+<ul>
+  <li><b>You need clean, even quad topology</b> for animation deformation, subdivision or further sculpting. Reduce keeps the original vertices and gives a mix of quads and triangles; it does not retopologize. Use a retopology tool (Blender's QuadriFlow or Voxel Remesh, or manual retopology) instead.</li>
+  <li><b>The mesh is already at or below your budget.</b> There is nothing to gain.</li>
+  <li><b>You need a live, adjustable result.</b> Reduce makes a new object in one go; to try other settings, delete it and run again.</li>
+</ul>
+</section>
+
+<!-- ============================================================ 13 -->
+<section id="trouble">
+<h2><span class="n">13</span>Troubleshooting</h2>
+<details open><summary>"budget not reached"</summary><div>
+  <p>A limit stopped Reduce first; the Info log says which. Raise Max Deviation, raise or untick Max Angle, or untick Protect UVs if the model is untextured. Or accept the count: it is what keeps the shape within your limits.</p></div></details>
+<details><summary>The result looks softer or less detailed</summary><div>
+  <p>Detail smaller than the new triangles can't survive as geometry. Tick Keep Surface Detail (a lower Max Angle keeps more), or run Bake Detail.</p></div></details>
+<details><summary>Shading looks blotchy or faceted</summary><div>
+  <p>Use Normals: Smooth. If the object was made by a TrueShape version before 0.3, reduce the original again.</p></div></details>
+<details><summary>Bake Detail is greyed out</summary><div>
+  <p>It needs the reduced object active and its original present. If the original was renamed, select the original and the reduced object together, with the reduced one active (last clicked).</p></div></details>
+<details><summary>The baked map is flat, or has specks along seams</summary><div>
+  <p>Specks: raise Margin or Resolution. Flat map: make sure the original is in the scene and not deleted. Overlapping UVs also cause trouble, so tick New UVs.</p></div></details>
+<details><summary>The face count is lower than my budget</summary><div>
+  <p>That's expected: the budget counts triangles, and quads count as two. Check the <b>Triangles</b> line in the Statistics overlay. See <a href="#what">Faces or triangles?</a></p></div></details>
+<details><summary>It takes a long time on huge meshes</summary><div>
+  <p>Reduce runs in Python: roughly 500 to 800 removals a second on a desktop CPU. A 21k-triangle prop takes seconds; a 600k-triangle character takes several minutes. The progress bar shows how far it has got, and <span class="ui">Esc</span> always cancels cleanly.</p></div></details>
+</section>
+
+<footer class="foot">TrueShape 0.4.0 &middot; GPL-3.0-or-later &middot; <a href="TrueShape_Guide.pdf" download>PDF version of this guide</a></footer>
+
+</div>
+</main>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function stored() { try { return localStorage.getItem("ts-theme"); } catch (e) { return null; } }
+  var t = stored();
+  if (t === "light" || t === "dark") root.setAttribute("data-theme", t);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var cur = root.getAttribute("data-theme") ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("ts-theme", next); } catch (e) {}
+  });
+
+  var body = document.body, menu = document.getElementById("menuBtn");
+  menu.addEventListener("click", function () {
+    var open = body.classList.toggle("nav-open");
+    menu.setAttribute("aria-expanded", open);
+  });
+  document.querySelectorAll(".toc a[href^='#']").forEach(function (a) {
+    a.addEventListener("click", function () { body.classList.remove("nav-open"); menu.setAttribute("aria-expanded", false); });
+  });
+
+  // highlight the section being read
+  var links = {};
+  document.querySelectorAll(".toc ol a").forEach(function (a) { links[a.getAttribute("href").slice(1)] = a; });
+  var current = null;
+  function mark(id) {
+    if (id === current) return;
+    if (current && links[current]) links[current].classList.remove("on");
+    current = id;
+    if (links[id]) links[id].classList.add("on");
+  }
+  var secs = Array.prototype.slice.call(document.querySelectorAll("main section[id]"));
+  function spy() {
+    var y = window.scrollY + 140, id = secs[0].id;
+    secs.forEach(function (s) { if (s.offsetTop <= y) id = s.id; });
+    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) id = secs[secs.length - 1].id;
+    mark(id);
+  }
+  window.addEventListener("scroll", spy, { passive: true });
+  spy();
+})();
+</script>
+</body>
+</html>
