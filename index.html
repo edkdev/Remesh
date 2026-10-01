@@ -215,7 +215,7 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
   </button>
   <a class="brand" href="#top"><i></i>TrueShape</a>
-  <span class="ver">v0.4.0</span>
+  <span class="ver">v0.5.0</span>
   <span class="grow"></span>
   <a class="tbtn" href="TrueShape_Guide.pdf" download>
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8m0 0L5 7m3 3 3-3M3 13h10"/></svg><span class="t">PDF</span>
@@ -254,7 +254,7 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
   <h1>TrueShape</h1>
   <p class="lead">Cut the triangle count of any model without changing its shape, then bake the fine detail back as a normal map.</p>
   <ul class="facts">
-    <li>Version 0.4.0</li>
+    <li>Version 0.5.0</li>
     <li>Blender 4.2 and later (tested on 5.2)</li>
     <li>Windows, macOS, Linux</li>
     <li>Pure Python, nothing to compile</li>
@@ -306,7 +306,7 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
 <ol class="steps">
   <li>In Blender, open <span class="ui">Edit &rsaquo; Preferences &rsaquo; Get Extensions</span>.</li>
   <li>Click the <span class="ui">&#8964;</span> menu at the top right and choose <span class="ui">Install from Disk&hellip;</span></li>
-  <li>Pick <code>trueshape-0.4.0.zip</code>. The add-on is enabled straight away.</li>
+  <li>Pick <code>trueshape-0.5.0.zip</code>. The add-on is enabled straight away.</li>
 </ol>
 <p>You can also drag the zip file onto the Blender window.</p>
 </section>
@@ -349,7 +349,7 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
   </div>
   <figcaption>The bike arrived triangulated. Pair Triangles joined flat pairs into quads, then Reduce removed whole rings from the tyre and tubes. The largest measured distance between the two surfaces was 0.02% of the bike's size.</figcaption>
 </figure>
-<div class="call note"><b>Why each part stays usable</b>Every <code>_low</code> object keeps its original's location, rotation (including quaternion rotation), scale, parent, collections, materials, vertex group weights and animation action. A wheel that spun before still spins.</div>
+<div class="call note"><b>Why each part stays usable</b>Every <code>_low</code> object keeps its original's location, rotation (including quaternion rotation), scale, parent, collections, materials, vertex group weights, modifiers, constraints and animation. A wheel that spun before still spins.</div>
 <div class="call note"><b>Split imports are handled for you</b>This bike came in as loose triangles, with every face separate from its neighbours. Reduce welds such models automatically and keeps them flat-shaded, so they look exactly as they did.</div>
 </section>
 
@@ -465,6 +465,16 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
     <td data-l="Lower it when">Separate parts sit very close together and must stay separate (layered clothing, stacked plates). 0 never merges.</td>
   </tr>
   <tr>
+    <td>Keep Modifiers<small>on</small></td>
+    <td data-l="What it does">Gives each reduced copy its original's modifiers, unapplied: Armature, Mirror, Subdivision and the rest. Hooks follow their vertices.</td>
+    <td data-l="Advice" colspan="2">Turn it off when you want only the bare reduced mesh. See <a href="#kept">what is kept</a> for the few modifiers that can't follow.</td>
+  </tr>
+  <tr>
+    <td>Keep Shape Keys<small>on</small></td>
+    <td data-l="What it does">Carries every shape key over with its value, range and drivers. Each kept vertex sits exactly where it did in every key.</td>
+    <td data-l="Advice" colspan="2">Turn it off for static props and distant LODs that don't need them: every key adds to the file and to export size.</td>
+  </tr>
+  <tr>
     <td>Hide Original<small>on</small></td>
     <td data-l="What it does">Hides the source objects after Reduce. They are never modified either way.</td>
     <td data-l="Advice" colspan="2">Turn it off to see before and after side by side.</td>
@@ -516,6 +526,7 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
   <div>moved &le; 0.16%</div><div>The largest distance any removal moved the surface, as a share of the selection's size. A cautious upper bound: the true figure is usually lower.</div>
   <div>turned &le; 15&deg;</div><div>The largest angle any part of the surface turned.</div>
   <div>11s</div><div>How long it took.</div>
+  <div>counted before modifiers</div><div>Shown when the copies kept modifiers. The triangle counts are for the mesh itself; a Mirror or Subdivision modifier adds its own on top.</div>
   <div>budget not reached</div><div>Shown when a limit stopped Reduce first. The Info log says which one: Max Deviation or Max Angle, or "nothing else can go without breaking UVs, seams or topology".</div>
 </div>
 <p><b>While it runs</b>, the button becomes a progress bar (Preparing, Finding removals, Reducing <i>n</i> &rarr; <i>budget</i> tris), and the status bar shows the same. You can orbit and zoom; other editing waits until it finishes. <span class="ui">Esc</span> cancels and changes nothing.</p>
@@ -551,17 +562,20 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
     <li>Materials and per-face assignment</li>
     <li>Color attributes (per vertex and per corner)</li>
     <li>Vertex group weights (rigging)</li>
+    <li>Shape keys, with their values, ranges and drivers</li>
+    <li>Modifiers, unapplied (Armature, Mirror, Subdivision and the rest)</li>
     <li>Marked seams and sharp edges</li>
     <li>Location, rotation, scale, parent, collections</li>
-    <li>Animation action</li>
+    <li>Constraints, drivers, animation and custom properties</li>
   </ul></div>
-  <div class="no"><h4>Not kept</h4><ul>
-    <li><b>Modifiers.</b> Reduce uses the base mesh. Apply any modifier whose result you want reduced (Mirror, Subdivision, Boolean) first. TrueShape warns you when a source has modifiers.</li>
-    <li><b>Shape keys</b> are not carried over yet; TrueShape warns you. Reduce before creating shape keys, or apply them.</li>
+  <div class="no"><h4>Not kept, or needs a second look</h4><ul>
+    <li><b>Multires and hair particles</b> are left out. Their data belongs to the original's faces, which no longer exist. TrueShape tells you when it drops one.</li>
+    <li><b>Bound deformers</b> (Mesh Deform, Surface Deform, Laplacian Deform, Corrective Smooth) are kept but must be bound again, because the vertices changed. TrueShape lists them.</li>
     <li><b>Custom normals</b> as they were: they are rebuilt (see Normals).</li>
-    <li><b>Constraints and drivers</b> on the object are not copied.</li>
   </ul></div>
 </div>
+<div class="call note"><b>Modifiers are carried over, not applied</b>Reduce works on the mesh as it is before modifiers, and the budget counts those triangles. That is what lets a rigged character keep its Armature and a mirrored model stay mirrored. To reduce what a modifier produces instead, such as a subdivided surface, apply that modifier first.</div>
+<div class="call note"><b>Rigs and shape keys stay exact where it counts</b>Every vertex in the result is an original vertex with its original weights and shape key positions, so it moves exactly as it did. Reduce measures Max Deviation on the resting shape, though. If a shape key or pose bends an area that is flat at rest, check it at full strength, and lower Max Deviation if it looks too coarse.</div>
 </section>
 
 <!-- ============================================================ 12 -->
@@ -589,11 +603,15 @@ pre { font: 500 13.5px/1.6 var(--mono); background: var(--stage); color: #d9dee6
   <p>Specks: raise Margin or Resolution. Flat map: make sure the original is in the scene and not deleted. Overlapping UVs also cause trouble, so tick New UVs.</p></div></details>
 <details><summary>The face count is lower than my budget</summary><div>
   <p>That's expected: the budget counts triangles, and quads count as two. Check the <b>Triangles</b> line in the Statistics overlay. See <a href="#what">Faces or triangles?</a></p></div></details>
+<details><summary>The viewport shows more triangles than my budget</summary><div>
+  <p>The copy kept a modifier that adds geometry, such as Mirror, Subdivision or Array. The budget counts the mesh before modifiers, and the report says "counted before modifiers". Remove the modifier from the copy, or untick <span class="ui">Keep Modifiers</span> under Options.</p></div></details>
+<details><summary>A modifier on the copy shows an error or does nothing</summary><div>
+  <p>Mesh Deform, Surface Deform, Laplacian Deform and Corrective Smooth remember the mesh they were bound to. Press Unbind, then Bind, on the reduced copy, with the rig in its rest pose.</p></div></details>
 <details><summary>It takes a long time on huge meshes</summary><div>
   <p>Reduce runs in Python: roughly 500 to 800 removals a second on a desktop CPU. A 21k-triangle prop takes seconds; a 600k-triangle character takes several minutes. The progress bar shows how far it has got, and <span class="ui">Esc</span> always cancels cleanly.</p></div></details>
 </section>
 
-<footer class="foot">TrueShape 0.4.0 &middot; GPL-3.0-or-later &middot; <a href="TrueShape_Guide.pdf" download>PDF version of this guide</a></footer>
+<footer class="foot">TrueShape 0.5.0 &middot; GPL-3.0-or-later &middot; <a href="TrueShape_Guide.pdf" download>PDF version of this guide</a></footer>
 
 </div>
 </main>
